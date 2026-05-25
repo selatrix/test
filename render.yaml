@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: ink-site
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+    routes:
+      - type: rewrite
+        source: /health
+        destination: /index.html
+      - type: rewrite
+        source: /ping
+        destination: /index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
