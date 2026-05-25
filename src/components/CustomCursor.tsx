@@ -1,22 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
+const LERP_SPEED = 0.15; // Smooth damping
+
 export const CustomCursor = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [displayPos, setDisplayPos] = useState({ x: 0, y: 0 });
   const [clicking, setClicking] = useState(false);
+  const posRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+      posRef.current = { x: e.clientX, y: e.clientY };
+      
+      // Cancel previous RAF to avoid queue buildup
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      
+      rafRef.current = requestAnimationFrame(() => {
+        setDisplayPos(p => ({
+          x: p.x + (posRef.current.x - p.x) * LERP_SPEED,
+          y: p.y + (posRef.current.y - p.y) * LERP_SPEED,
+        }));
+      });
     };
+    
     const onMouseDown = () => setClicking(true);
     const onMouseUp = () => setClicking(false);
 
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('mousedown', onMouseDown, { passive: true });
+    window.addEventListener('mouseup', onMouseUp, { passive: true });
 
     return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mouseup', onMouseUp);
@@ -31,8 +47,9 @@ export const CustomCursor = () => {
         left: 0,
         pointerEvents: 'none',
         zIndex: 99999,
-        x: position.x - 16,
-        y: position.y - 16,
+        x: displayPos.x - 16,
+        y: displayPos.y - 16,
+        willChange: 'transform',
       }}
     >
       {/* Outer ring */}
@@ -50,6 +67,7 @@ export const CustomCursor = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          willChange: 'transform',
         }}
       >
         {/* Inner dot */}
@@ -64,6 +82,7 @@ export const CustomCursor = () => {
             height: 4,
             backgroundColor: 'white',
             borderRadius: '50%',
+            willChange: 'transform',
           }}
         />
       </motion.div>
