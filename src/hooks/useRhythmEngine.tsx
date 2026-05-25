@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, useRef, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, useRef, type ReactNode } from 'react';
 
 const TARGET_VOL = 0.72;
 

@@ -3,14 +3,14 @@ import { useLocation } from 'react-router-dom';
 import { useRhythmEngine } from '../hooks/useRhythmEngine';
 
 const BEAT_SPRING = { type: 'spring' as const, stiffness: 560, damping: 26 };
-const SNAP        = { type: 'tween'  as const, duration: 0.055, ease: 'easeOut' };
+const SNAP        = { type: 'tween'  as const, duration: 0.055, ease: 'easeOut' as const };
 
 /* ─── Idle easing: smooth sine feel ─── */
 const FLOAT = {
   duration: 3.4,
   repeat: Infinity,
   repeatType: 'loop' as const,
-  ease: [0.45, 0, 0.55, 1],
+  ease: 'easeInOut' as const,
 };
 
 export const InkCharacter = () => {
