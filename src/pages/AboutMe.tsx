@@ -94,7 +94,7 @@ export const AboutMe = () => {
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${val}%`, boxShadow: active ? `0 0 14px ${color}` : 'none' }}
-                    transition={{ width: { duration: 1.1, delay: 0.18, ease: EASE as unknown as string }, boxShadow: { duration: 0.12 } }}
+                    transition={{ width: { duration: 1.1, delay: 0.18, ease: EASE }, boxShadow: { duration: 0.12 } }}
                     style={{ height: '100%', borderRadius: 1, backgroundColor: isPlaying ? color : '#282828', transition: 'background-color 0.8s' }}
                   />
                 </div>
