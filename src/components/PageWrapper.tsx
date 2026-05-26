@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import type { Transition } from 'framer-motion';
 import type { ReactNode } from 'react';
 
 interface PageWrapperProps {
@@ -6,14 +7,15 @@ interface PageWrapperProps {
 }
 
 const variants = {
-  initial: { opacity: 0, y: 18, filter: 'blur(5px)' },
-  animate: { opacity: 1, y: 0,  filter: 'blur(0px)' },
-  exit:    { opacity: 0, y: -14, filter: 'blur(5px)' },
+  initial: { opacity: 0, y: 14 },
+  animate: { opacity: 1, y: 0  },
+  exit:    { opacity: 0, y: -10 },
 };
 
-const transition = {
-  duration: 0.42,
-  ease: 'easeInOut' as const,
+/* No blur — blur forces full-subtree GPU compositing on every frame */
+const transition: Transition = {
+  duration: 0.36,
+  ease:     'easeOut',
 };
 
 export const PageWrapper = ({ children }: PageWrapperProps) => (
@@ -24,7 +26,10 @@ export const PageWrapper = ({ children }: PageWrapperProps) => (
     exit="exit"
     transition={transition}
     className="flex-1 z-20 relative"
-    style={{ padding: 'clamp(1.2rem, 4vw, 2.5rem) clamp(1rem, 5vw, 3rem)' }}
+    style={{
+      padding:  'clamp(2rem, 5vw, 3.5rem) clamp(1.5rem, 5vw, 3.5rem)',
+      maxWidth: '100%',
+    }}
   >
     {children}
   </motion.div>
