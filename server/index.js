@@ -108,7 +108,7 @@ const showGames = (chatId) => {
       ]),
       [{ text: '⬅️ Menu', callback_data: 'nav_menu' }],
     ]},
-  });
+  );
 };
 bot.onText(/^\/games$/, (msg) => { if (!isOwner(msg)) return; showGames(msg.chat.id); });
 
@@ -137,11 +137,11 @@ const showProjects = (chatId) => {
       ...d.projects.map(s => [{ text: `📂 ${s.label}`, callback_data: `sec_${s.key}` }]),
       [{ text: '⬅️ Menu', callback_data: 'nav_menu' }],
     ]},
-  });
+  );
 };
 bot.onText(/^\/projects$/, (msg) => { if (!isOwner(msg)) return; showProjects(msg.chat.id); });
 
-/* ─── /addproject <section> ─────────────────────────────────── */
+/* ─── /addproject <section> ─────────────────────────────── */
 bot.onText(/^\/addproject (\w+)$/, (msg, m) => {
   if (!isOwner(msg)) return;
   const id = msg.chat.id; const key = m[1].toLowerCase();
@@ -169,11 +169,29 @@ bot.on('callback_query', async (q) => {
   const data = q.data;
   bot.answerCallbackQuery(q.id).catch(() => {});
 
-  if (data === 'nav_menu'     || data === 'nav_start') { bot.emit('message', { ...q.message, text: '/menu',     from: q.from }); return; }
-  if (data === 'nav_games')    { bot.emit('message', { ...q.message, text: '/games',    from: q.from }); return; }
-  if (data === 'nav_projects') { bot.emit('message', { ...q.message, text: '/projects', from: q.from }); return; }
-  if (data === 'nav_about')    { bot.emit('message', { ...q.message, text: '/about',    from: q.from }); return; }
-  if (data === 'nav_help')     { bot.emit('message', { ...q.message, text: '/help',     from: q.from }); return; }
+  if (data === 'nav_menu'     || data === 'nav_start') { 
+    const d = load();
+    md(id, `🎮 *ink's site manager*\n\nWhat do you want to manage?`, {
+      reply_markup: { inline_keyboard: [
+        [{ text: '📝 About',    callback_data: 'nav_about'    }],
+        [{ text: '🎮 Games',    callback_data: 'nav_games'    }],
+        [{ text: '💼 Projects', callback_data: 'nav_projects' }],
+        [{ text: 'ℹ️ Help',    callback_data: 'nav_help'     }],
+      ]},
+    });
+    return; 
+  }
+  if (data === 'nav_games')    { showGames(id); return; }
+  if (data === 'nav_projects') { showProjects(id); return; }
+  if (data === 'nav_about')    { showAbout(id); return; }
+  if (data === 'nav_help')     { 
+    md(id, `*Commands*\n\n/menu — main menu\n/status — content summary\n\n*About*\n/about — view & edit about\n/setbio — update bio text\n\n*Games*\n/games — list games\n/addgame — add a game\n/removegame \\<num\\> — remove game\n\n*Projects*\n/projects — list sections\n/addproject \\<section\\> — add item\n/removeproject \\<section\\> \\<num\\> — remove item\n\nSections: apps github sites bots tools`, {
+      reply_markup: { inline_keyboard: [
+        [{ text: '⬅️ Menu', callback_data: 'nav_menu' }],
+      ]},
+    });
+    return; 
+  }
 
   /* Games */
   if (data === 'game_add') {
@@ -192,7 +210,8 @@ bot.on('callback_query', async (q) => {
     const d = load(); const g = d.games[idx];
     if (!g) return;
     sessions[id] = { step: 'game_edit_field', data: { idx } };
-    md(id, `✏️ *${g.title}*\n\n• title: \`${g.title}\`\n• desc: ${g.desc}\n• url: ${g.url||'_none_'}\n• plays: ${g.plays}\n• color: ${g.color}\n\nWhich field? (title / desc / url / plays / color)`); return;
+    md(id, `✏️ *${g.title}*\n\n• title: \`${g.title}\`\n• desc: ${g.desc}\n• url: ${g.url||'_none_'}\n• plays: ${g.plays}\n• color: ${g.color}\n\nWhich field? (title / desc / url / plays / color)`);
+    return;
   }
 
   /* Project sections */
@@ -241,7 +260,8 @@ bot.on('callback_query', async (q) => {
     const item = sec?.items[idx];
     if (!item) return;
     sessions[id] = { step: 'proj_edit_field', data: { section: key, idx } };
-    md(id, `✏️ *${item.title}*\n\n• title: \`${item.title}\`\n• desc: ${item.desc}\n• url: ${item.url||'_none_'}\n• badge: ${item.badge}\n\nWhich field? (title / desc / url / badge)`); return;
+    md(id, `✏️ *${item.title}*\n\n• title: \`${item.title}\`\n• desc: ${item.desc}\n• url: ${item.url||'_none_'}\n• badge: ${item.badge}\n\nWhich field? (title / desc / url / badge)`);
+    return;
   }
 
   /* About actions */
@@ -251,7 +271,7 @@ bot.on('callback_query', async (q) => {
   }
   if (data === 'about_stats') {
     const d = load();
-    md(id, `📊 *Current Stats:*\n${d.about.stats.map((s,i)=>`${i+1}. ${s.label}: ${s.val}% ${s.color}`).join('\n')}\n\nSend stats — one per line:\n\`LABEL VAL COLOR\`\nExample:\n\`\`\`\nCODING 85 #00ffff\nRHYTHM 99 #ff00ff\n\`\`\``);
+    md(id, `📊 *Current Stats:*\n${d.about.stats.map((s,i)=>`${i+1}. ${s.label}: ${s.val}% ${s.color}`).join('\n')}\n\nSend stats — one per line:\n\`LABEL VAL COLOR\`\nExample:\n\`\`\`\nCODING 85 #00ffff\nDESIGN 72 #ff00ff\n\`\`\``);
     sessions[id] = { step: 'about_stats', data: {} }; return;
   }
   if (data === 'about_inventory') {
