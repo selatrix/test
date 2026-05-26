@@ -2,20 +2,24 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #080808;
-  --text: #ffffff;
-  --idle: #383838;
+  --bg:       #080808;
+  --text:     #ffffff;
+  --idle:     #383838;
   --idle-dim: #222222;
-  --accent: #00ffff;
-  --mono: 'Share Tech Mono', monospace;
-  --pixel: 'VT323', monospace;
+  --accent:   #00ffff;
+  --mono:     'Share Tech Mono', monospace;
+  --pixel:    'VT323', monospace;
 }
 
 * {
   box-sizing: border-box;
-  cursor: none !important;
   user-select: none !important;
   -webkit-user-select: none !important;
+}
+
+/* Custom cursor only on mouse/trackpad — not on touch screens */
+@media (pointer: fine) {
+  * { cursor: none !important; }
 }
 
 ::selection { background: transparent !important; }
@@ -43,24 +47,7 @@ body {
   flex-direction: column;
 }
 
-/* Scanlines */
-body::after {
-  content: '';
-  display: block;
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    rgba(255,255,255,0.012) 3px,
-    rgba(255,255,255,0.012) 4px
-  );
-  z-index: 9999;
-  pointer-events: none;
-}
-
-/* Dot grid background */
+/* ── Dot grid background ── */
 body::before {
   content: '';
   display: block;
@@ -70,10 +57,27 @@ body::before {
   background-size: 32px 32px;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
-::-webkit-scrollbar { width: 4px; }
+/* ── Scanlines ── */
+body::after {
+  content: '';
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255,255,255,0.01) 3px,
+    rgba(255,255,255,0.01) 4px
+  );
+  z-index: 9999;
+  pointer-events: none;
+}
+
+::-webkit-scrollbar       { width: 4px; }
 ::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
@@ -84,22 +88,42 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+a { color: inherit; text-decoration: none; }
+
+/* ─────────────────────────────────────────────
+   CSS keyframe: character idle float
+   Runs on compositor thread — zero JS cost.
+   Removed automatically when music starts
+   (the .ink-idle-float class is toggled in React)
+   ───────────────────────────────────────────── */
+@keyframes ink-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+.ink-idle-float {
+  animation: ink-float 3.4s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  50%       { opacity: 0; }
 }
 
 .cursor-blink { animation: blink 1s step-end infinite; }
 
-/* Mobile safe area support */
+/* GPU promotion: own compositor layer from the start */
+.gpu {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ── Mobile safe area ── */
 @supports (padding: max(0px)) {
   body {
-    padding-left: env(safe-area-inset-left);
+    padding-left:  env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
 }
