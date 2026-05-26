@@ -1,4 +1,3 @@
-```tsx
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 import type { Transition } from 'framer-motion';
@@ -338,18 +337,14 @@ export const InkCharacter = memo(() => {
     </div>
   );
 });
-```
 
-Add this somewhere globally too:
-
-```css
-@keyframes crtFlicker {
-  0% { opacity: 0.92; }
-  50% { opacity: 0.88; }
-  100% { opacity: 0.92; }
-}
-
-svg {
-  animation: crtFlicker 4s infinite ease-in-out;
-}
-```
+// Add this CSS to your global styles:
+// @keyframes crtFlicker {
+//   0% { opacity: 0.92; }
+//   50% { opacity: 0.88; }
+//   100% { opacity: 0.92; }
+// }
+//
+// svg {
+//   animation: crtFlicker 4s infinite ease-in-out;
+// }
