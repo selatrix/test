@@ -10,12 +10,6 @@ const BEAT_SPRING: Transition = {
   damping: 20,
 };
 
-const SNAP: Transition = {
-  type: 'tween',
-  duration: 0.12,
-  ease: 'easeOut',
-};
-
 const HEAD_IDLE: Transition = {
   duration: 8,
   repeat: Infinity,
