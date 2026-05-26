@@ -4,341 +4,133 @@ import type { Transition } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useRhythmEngine } from '../hooks/useRhythmEngine';
 
-const BEAT_SPRING: Transition = {
-  type: 'spring',
-  stiffness: 120,
-  damping: 20,
-};
-
-const HEAD_IDLE: Transition = {
-  duration: 8,
-  repeat: Infinity,
-  ease: 'easeInOut',
-};
+const BEAT_SPRING: Transition = { type: 'spring', stiffness: 480, damping: 32 };
+const SNAP: Transition = { type: 'tween', duration: 0.06, ease: 'easeOut' };
+const HEAD_IDLE: Transition = { duration: 7.5, repeat: Infinity, ease: 'easeInOut' };
 
 export const InkCharacter = memo(() => {
   const { isPlaying, currentBeat, isMeasure } = useRhythmEngine();
   const location = useLocation();
-
   const isHome = location.pathname === '/';
   const b4 = currentBeat % 4;
 
-  const headTilt = [0, 1.2, -0.5, -1.4][b4] ?? 0;
-  const bodyY = [0, -4, 1, 2][b4] ?? 0;
+  const headTilt = [0, 2.8, -1.2, -3.5][b4] ?? 0;
+  const bodyY = [0, -7, 4, 6][b4] ?? 0;
 
   const glowFilter = isPlaying && isMeasure
-    ? 'drop-shadow(0 0 8px rgba(255,255,255,0.45)) drop-shadow(0 0 18px rgba(0,255,255,0.22))'
+    ? 'drop-shadow(0 0 14px rgba(180, 60, 255, 0.55)) drop-shadow(0 0 32px rgba(0, 240, 255, 0.35))'
     : 'none';
 
   return (
     <div
+      className="gpu"
       style={{
         position: 'fixed',
         bottom: 0,
-        right: isHome ? 'clamp(12px, 2vw, 32px)' : '8px',
-        width: isHome
-          ? 'clamp(180px, 36vw, 300px)'
-          : 'clamp(120px, 18vw, 170px)',
-        aspectRatio: '100 / 145',
+        right: isHome ? 'clamp(8px, 2.5vw, 32px)' : '8px',
+        width: isHome ? 'clamp(175px, 39vw, 330px)' : 'clamp(110px, 17vw, 170px)',
+        aspectRatio: '100 / 148',
         zIndex: 18,
         pointerEvents: 'none',
         userSelect: 'none',
-        transition:
-          'right 0.7s cubic-bezier(0.34,1.56,0.64,1), width 0.7s',
       }}
     >
-      <motion.div
-        animate={isPlaying ? { y: bodyY } : { y: [0, -1, 0] }}
-        transition={isPlaying ? BEAT_SPRING : HEAD_IDLE}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <svg
-          viewBox="0 0 100 145"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{
-            width: '100%',
-            height: '100%',
-            overflow: 'hidden',
-            opacity: 0.92,
-            mixBlendMode: 'screen',
-            filter: `${glowFilter} blur(0.15px)`,
-            transition: 'filter 0.5s ease',
-          }}
+      <div className={!isPlaying ? 'ink-idle-float' : undefined} style={{ width: '100%', height: '100%' }}>
+        <motion.div
+          animate={isPlaying ? { y: bodyY } : { y: 0 }}
+          transition={isPlaying ? BEAT_SPRING : { duration: 0.45 }}
+          style={{ width: '100%', height: '100%' }}
         >
-          <motion.g
-            animate={isPlaying
-              ? { rotate: headTilt }
-              : { rotate: [0, 0.5, 0, -0.5, 0] }}
-            transition={isPlaying ? BEAT_SPRING : HEAD_IDLE}
-            style={{ transformOrigin: '50px 56px' }}
+          <svg
+            viewBox="0 0 100 148"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{
+              width: '100%',
+              height: '100%',
+              filter: glowFilter,
+              transition: 'filter 0.7s ease',
+            }}
           >
-            {/* Hair outline */}
-            <path
-              d="M 20,28 C 10,42 4,66 5,98 C 6,118 10,134 14,144"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
+            <defs>
+              <clipPath id="vp"><rect width="100" height="148" /></clipPath>
+            </defs>
+            <g clipPath="url(#vp)">
 
-            <path
-              d="M 80,28 C 90,42 96,66 95,98 C 94,118 90,134 86,144"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
+              {/* HEAD GROUP */}
+              <motion.g
+                animate={isPlaying ? { rotate: headTilt } : { rotate: [0, 1, 0, -1, 0] }}
+                transition={isPlaying ? BEAT_SPRING : HEAD_IDLE}
+                style={{ transformOrigin: '50px 57px' }}
+              >
+                {/* Hair - Classic Lain bowl cut + side locks */}
+                <path d="M25 29 Q15 48 18 85 Q22 115 35 125" stroke="#fff" strokeWidth="19" strokeLinecap="round"/>
+                <path d="M75 29 Q85 48 82 85 Q78 115 65 125" stroke="#fff" strokeWidth="19" strokeLinecap="round"/>
 
-            {/* Face */}
-            <path
-              d="M 22,42 C 22,20 30,12 50,12 C 70,12 78,20 78,42 C 78,66 66,82 50,82 C 34,82 22,66 22,42 Z"
-              stroke="white"
-              strokeWidth="1.3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+                {/* Hair front bangs */}
+                <path d="M26 26 Q50 12 74 27" stroke="#fff" strokeWidth="13" strokeLinecap="round"/>
+                <path d="M29 19 Q37 13 46 20" stroke="#fff" strokeWidth="9" strokeLinecap="round"/>
+                <path d="M54 19 Q63 13 71 20" stroke="#fff" strokeWidth="9" strokeLinecap="round"/>
 
-            {/* Messy bangs */}
-            <path
-              d="M 28,12 C 26,24 24,42 24,58"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
+                {/* Side hair strands */}
+                <path d="M23 38 Q17 62 21 98" stroke="#fff" strokeWidth="11" strokeLinecap="round"/>
+                <path d="M77 38 Q83 62 79 98" stroke="#fff" strokeWidth="11" strokeLinecap="round"/>
 
-            <path
-              d="M 36,12 C 34,26 34,46 36,64"
-              stroke="white"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
+                {/* Face */}
+                <ellipse cx="50" cy="54" rx="19.5" ry="27" stroke="#fff" strokeWidth="2.2"/>
 
-            <path
-              d="M 46,12 C 46,32 46,56 48,74"
-              stroke="white"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
+                {/* Eyes - Exact Lain style (large, slightly hollow) */}
+                <motion.g
+                  animate={isMeasure && isPlaying ? { scaleY: [1, 0.06, 1] } : { scaleY: 1 }}
+                  transition={{ duration: 0.13 }}
+                  style={{ transformOrigin: '37.5px 51px' }}
+                >
+                  <ellipse cx="37.5" cy="51" rx="6.2" ry="8.8" stroke="#fff" strokeWidth="1.8"/>
+                  <circle cx="38.5" cy="49.5" r="2.4" fill="#fff"/>
+                </motion.g>
 
-            <path
-              d="M 58,12 C 60,28 60,48 60,70"
-              stroke="white"
-              strokeWidth="1.3"
-              strokeLinecap="round"
-            />
+                <motion.g
+                  animate={isMeasure && isPlaying ? { scaleY: [1, 0.06, 1] } : { scaleY: 1 }}
+                  transition={{ duration: 0.13 }}
+                  style={{ transformOrigin: '62.5px 51px' }}
+                >
+                  <ellipse cx="62.5" cy="51" rx="6.2" ry="8.8" stroke="#fff" strokeWidth="1.8"/>
+                  <circle cx="61.5" cy="49.5" r="2.4" fill="#fff"/>
+                </motion.g>
 
-            <path
-              d="M 70,12 C 72,28 74,48 76,62"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
+                {/* Eyebrows */}
+                <path d="M30 37 Q37 33 44 35" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/>
+                <path d="M56 35 Q63 33 70 37" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/>
 
-            {/* Left eye */}
-            <motion.g
-              animate={isMeasure && isPlaying
-                ? { scaleY: [1, 0.08, 1] }
-                : { scaleY: 1 }}
-              transition={{ duration: 0.16 }}
-              style={{ transformOrigin: '38px 48px' }}
-            >
-              <ellipse
-                cx="38"
-                cy="48"
-                rx="8"
-                ry="10"
-                stroke="white"
-                strokeWidth="1.2"
-              />
-
-              <circle
-                cx="38"
-                cy="50"
-                r="2.5"
-                fill="white"
-              />
-
-              <circle
-                cx="39"
-                cy="49"
-                r="1"
-                fill="black"
-              />
-            </motion.g>
-
-            {/* Right eye */}
-            <motion.g
-              animate={isMeasure && isPlaying
-                ? { scaleY: [1, 0.08, 1] }
-                : { scaleY: 1 }}
-              transition={{ duration: 0.16 }}
-              style={{ transformOrigin: '62px 48px' }}
-            >
-              <ellipse
-                cx="62"
-                cy="48"
-                rx="8"
-                ry="10"
-                stroke="white"
-                strokeWidth="1.2"
-              />
-
-              <circle
-                cx="62"
-                cy="50"
-                r="2.5"
-                fill="white"
-              />
-
-              <circle
-                cx="63"
-                cy="49"
-                r="1"
-                fill="black"
-              />
-            </motion.g>
-
-            {/* Mouth */}
-            <line
-              x1="46"
-              y1="68"
-              x2="54"
-              y2="68"
-              stroke="white"
-              strokeWidth="1"
-              strokeLinecap="round"
-            />
-
-            {/* Neck */}
-            <line
-              x1="44"
-              y1="82"
-              x2="42"
-              y2="94"
-              stroke="white"
-              strokeWidth="1"
-              strokeLinecap="round"
-            />
-
-            <line
-              x1="56"
-              y1="82"
-              x2="58"
-              y2="94"
-              stroke="white"
-              strokeWidth="1"
-              strokeLinecap="round"
-            />
-
-            {/* Oversized shoulders */}
-            <path
-              d="M 36,94 C 18,98 8,116 4,138"
-              stroke="white"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-            />
-
-            <path
-              d="M 64,94 C 82,98 92,116 96,138"
-              stroke="white"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-            />
-
-            {/* Sweater */}
-            <path
-              d="M 28,98 C 30,122 30,136 34,144"
-              stroke="white"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
-
-            <path
-              d="M 72,98 C 70,122 70,136 66,144"
-              stroke="white"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
-
-            <path
-              d="M 38,94 C 44,98 56,98 62,94"
-              stroke="white"
-              strokeWidth="1"
-              strokeLinecap="round"
-            />
-
-            {/* Wired cables */}
-            <motion.path
-              d="M 84,88 C 96,104 94,122 88,145"
-              stroke="#00ffff"
-              strokeWidth="1"
-              opacity="0.45"
-              strokeLinecap="round"
-              animate={isPlaying
-                ? { pathOffset: [0, 0.08, 0] }
-                : { pathOffset: 0 }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-            />
-
-            <motion.path
-              d="M 12,84 C 4,102 6,124 14,145"
-              stroke="#00ffff"
-              strokeWidth="1"
-              opacity="0.35"
-              strokeLinecap="round"
-              animate={isPlaying
-                ? { pathOffset: [0, -0.08, 0] }
-                : { pathOffset: 0 }}
-              transition={{ duration: 3.2, repeat: Infinity }}
-            />
-
-            {/* Digital noise lines */}
-            {isMeasure && isPlaying && (
-              <>
-                <line
-                  x1="8"
-                  y1="36"
-                  x2="22"
-                  y2="36"
-                  stroke="#00ffff"
-                  strokeWidth="0.8"
-                  opacity="0.5"
+                {/* Mouth - subtle Lain expression */}
+                <motion.path
+                  d={isMeasure && isPlaying ? "M39 71 Q50 74 61 71" : "M40 71 Q50 73 60 71"}
+                  stroke="#fff"
+                  strokeWidth="1.15"
+                  strokeLinecap="round"
+                  transition={SNAP}
                 />
 
-                <line
-                  x1="78"
-                  y1="58"
-                  x2="92"
-                  y2="58"
-                  stroke="#00ffff"
-                  strokeWidth="0.8"
-                  opacity="0.5"
-                />
+                {/* Neck */}
+                <rect x="43" y="79" width="14" height="19" stroke="#fff" strokeWidth="2" rx="5"/>
+              </motion.g>
 
-                <line
-                  x1="12"
-                  y1="112"
-                  x2="24"
-                  y2="112"
-                  stroke="#00ffff"
-                  strokeWidth="0.8"
-                  opacity="0.4"
-                />
-              </>
-            )}
-          </motion.g>
-        </svg>
-      </motion.div>
+              {/* MIC - Minimal wired style */}
+              <motion.g
+                animate={isPlaying ? { rotate: [4, 19, -7, -19][b4] ?? 0 } : { rotate: [-7, 6, -7] }}
+                transition={isPlaying ? SNAP : { duration: 3.2, repeat: Infinity }}
+                style={{ transformOrigin: '79px 107px' }}
+              >
+                <circle cx="80" cy="71" r="7.8" stroke="#fff" strokeWidth="1.9"/>
+                <circle cx="80" cy="71" r="4.8" stroke="#fff" strokeWidth="1"/>
+                <line x1="80" y1="78" x2="80" y2="99" stroke="#fff" strokeWidth="2.1" strokeLinecap="round"/>
+                <path d="M72 101 Q71 108 75 113 Q80 116 85 113 Q89 108 88 101 Z" stroke="#fff" strokeWidth="1.6"/>
+              </motion.g>
+
+            </g>
+          </svg>
+        </motion.div>
+      </div>
     </div>
   );
 });
-
-// Add this CSS to your global styles:
-// @keyframes crtFlicker {
-//   0% { opacity: 0.92; }
-//   50% { opacity: 0.88; }
-//   100% { opacity: 0.92; }
-// }
-//
-// svg {
-//   animation: crtFlicker 4s infinite ease-in-out;
-// }
