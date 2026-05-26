@@ -9,8 +9,8 @@ const __dirname  = dirname(fileURLToPath(import.meta.url));
 const ROOT       = join(__dirname, '..');
 const DATA_FILE  = join(ROOT, 'data', 'content.json');
 const BOT_TOKEN  = process.env.TELEGRAM_BOT_TOKEN;
-const OWNER_ID   = process.env.TELEGRAM_OWNER_ID; // Kept as string to prevent Render string match traps
-const API_PORT   = process.env.PORT || 3001; // Fixed for Render Port Bind
+const OWNER_ID   = process.env.TELEGRAM_OWNER_ID; 
+const API_PORT   = process.env.PORT || 3001; 
 
 if (!BOT_TOKEN) { console.error('[bot] TELEGRAM_BOT_TOKEN not set'); process.exit(1); }
 if (!OWNER_ID)  { console.error('[bot] TELEGRAM_OWNER_ID not set');  process.exit(1); }
@@ -270,7 +270,7 @@ bot.on('callback_query', async (q) => {
   }
   if (data === 'about_stats') {
     const d = load();
-    md(id, `📊 *Current Stats:*\n${d.about.stats.map((s,i)=>`${i+1}. ${s.label}: ${s.val}% ${s.color}`).join('\n')}\n\nSend stats — one per line:\n\`LABEL VAL COLOR\`\nExample:\n\`\`\`\nCODING 85 #00ffff\nDESIGN 72 #ff00ff\n\`\`\XX`);
+    md(id, `📊 *Current Stats:*\n${d.about.stats.map((s,i)=>`${i+1}. ${s.label}: ${s.val}% ${s.color}`).join('\n')}\n\nSend stats — one per line:\n\`LABEL VAL COLOR\`\nExample:\n\`\`\`\nCODING 85 #00ffff\nDESIGN 72 #ff00ff\n\`\`\``);
     sessions[id] = { step: 'about_stats', data: {} }; return;
   }
   if (data === 'about_inventory') {
