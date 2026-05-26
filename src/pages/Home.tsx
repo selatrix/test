@@ -21,7 +21,6 @@ export const Home = () => {
     return () => clearTimeout(t);
   }, []);
 
-  /* keyboard */
   useEffect(() => {
     if (isPlaying) return;
     const onKey = () => handleStart();
@@ -34,11 +33,11 @@ export const Home = () => {
       className="flex-1 z-20 relative"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, filter: 'blur(4px)' }}
-      transition={{ duration: 0.5, ease: EASE }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4, ease: EASE }}
       style={{
         minHeight:      'calc(100dvh - 64px)',
-        padding:        'clamp(2rem, 8vw, 5rem) clamp(1.2rem, 5vw, 3rem)',
+        padding:        'clamp(2.5rem, 9vw, 6rem) clamp(1.5rem, 5vw, 3.5rem)',
         cursor:         'none',
         display:        'flex',
         flexDirection:  'column',
@@ -54,16 +53,16 @@ export const Home = () => {
           ? { opacity: 1, x: 0, textShadow: ['4px 0 0 #ff00ff,-4px 0 0 #00ffff', '-4px 0 0 #ff00ff,4px 0 0 #00ffff', '4px 0 0 #ff00ff,-4px 0 0 #00ffff'] }
           : { opacity: 1, x: 0, textShadow: 'none' }}
         transition={{
-          opacity:    { delay: 0.1, duration: 0.55, ease: EASE },
-          x:          { delay: 0.1, duration: 0.55, ease: EASE },
+          opacity:    { delay: 0.08, duration: 0.5, ease: EASE },
+          x:          { delay: 0.08, duration: 0.5, ease: EASE },
           textShadow: { duration: 0.18, repeat: isPlaying ? Infinity : 0 },
         }}
         style={{
           fontFamily: 'var(--pixel)',
-          fontSize:   'clamp(4.5rem, 16vw, 13rem)',
+          fontSize:   'clamp(5rem, 17vw, 14rem)',
           lineHeight: 0.9,
           color:      isPlaying ? '#ffffff' : '#2a2a2a',
-          maxWidth:   '60vw',
+          maxWidth:   '62vw',
           transition: 'color 0.9s',
         }}
       >
@@ -72,15 +71,15 @@ export const Home = () => {
 
       {/* Subtitle */}
       <motion.p
-        initial={{ opacity: 0, x: -16 }}
+        initial={{ opacity: 0, x: -14 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.22, duration: 0.5, ease: EASE }}
+        transition={{ delay: 0.18, duration: 0.45, ease: EASE }}
         style={{
           fontFamily:    'var(--mono)',
-          fontSize:      'clamp(0.58rem, 1.6vw, 0.88rem)',
-          letterSpacing: '0.3em',
-          marginTop:     '0.7rem',
-          marginBottom:  '2.5rem',
+          fontSize:      'clamp(0.72rem, 1.5vw, 1.05rem)',
+          letterSpacing: '0.28em',
+          marginTop:     '0.8rem',
+          marginBottom:  '2.8rem',
           color:         isPlaying ? '#3a3a3a' : '#1c1c1c',
           transition:    'color 0.9s',
         }}
@@ -88,38 +87,31 @@ export const Home = () => {
         coder · artist · gamer
       </motion.p>
 
-      {/* TAP TO START prompt */}
+      {/* TAP TO START */}
       <AnimatePresence>
         {!isPlaying && entered && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6, filter: 'blur(4px)' }}
-            transition={{ delay: 0.35, duration: 0.45, ease: EASE }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ delay: 0.32, duration: 0.4, ease: EASE }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}
           >
-            {/* Pulsing bracket */}
             <motion.span
-              animate={{ opacity: [0.15, 0.45, 0.15] }}
+              animate={{ opacity: [0.12, 0.4, 0.12] }}
               transition={{ duration: 1.1, repeat: Infinity }}
-              style={{ fontFamily: 'var(--pixel)', fontSize: 'clamp(0.65rem, 1.6vw, 0.85rem)', color: '#303030', letterSpacing: '0.05em' }}
-            >
-              [
-            </motion.span>
+              style={{ fontFamily: 'var(--pixel)', fontSize: 'clamp(0.7rem, 1.4vw, 0.95rem)', color: '#2e2e2e', letterSpacing: '0.05em' }}
+            >[</motion.span>
             <motion.span
-              animate={{ opacity: [0.22, 0.65, 0.22] }}
+              animate={{ opacity: [0.2, 0.6, 0.2] }}
               transition={{ duration: 1.1, repeat: Infinity, delay: 0.08 }}
-              style={{ fontFamily: 'var(--pixel)', fontSize: 'clamp(0.65rem, 1.6vw, 0.85rem)', letterSpacing: '0.32em', color: '#2e2e2e' }}
-            >
-              TAP TO START
-            </motion.span>
+              style={{ fontFamily: 'var(--pixel)', fontSize: 'clamp(0.7rem, 1.4vw, 0.95rem)', letterSpacing: '0.32em', color: '#2a2a2a' }}
+            >TAP TO START</motion.span>
             <motion.span
-              animate={{ opacity: [0.15, 0.45, 0.15] }}
+              animate={{ opacity: [0.12, 0.4, 0.12] }}
               transition={{ duration: 1.1, repeat: Infinity }}
-              style={{ fontFamily: 'var(--pixel)', fontSize: 'clamp(0.65rem, 1.6vw, 0.85rem)', color: '#303030', letterSpacing: '0.05em' }}
-            >
-              ]
-            </motion.span>
+              style={{ fontFamily: 'var(--pixel)', fontSize: 'clamp(0.7rem, 1.4vw, 0.95rem)', color: '#2e2e2e', letterSpacing: '0.05em' }}
+            >]</motion.span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -130,23 +122,23 @@ export const Home = () => {
           <motion.div
             key="mv"
             className="fixed inset-0 pointer-events-none"
-            style={{ zIndex: 1, background: 'radial-gradient(ellipse at 30% 55%, rgba(0,255,255,0.045) 0%, transparent 62%)' }}
+            style={{ zIndex: 1, background: 'radial-gradient(ellipse at 28% 52%, rgba(0,255,255,0.04) 0%, transparent 60%)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 0.65 }}
+            transition={{ duration: 0.6 }}
           />
         )}
       </AnimatePresence>
 
-      {/* Flash on start */}
+      {/* Start flash */}
       <AnimatePresence>
         {flash && (
           <motion.div
             className="fixed inset-0 pointer-events-none"
             style={{ backgroundColor: '#ffffff', zIndex: 60 }}
-            initial={{ opacity: 0.22 }}
+            initial={{ opacity: 0.2 }}
             animate={{ opacity: 0 }}
-            transition={{ duration: 0.38 }}
+            transition={{ duration: 0.36 }}
           />
         )}
       </AnimatePresence>
