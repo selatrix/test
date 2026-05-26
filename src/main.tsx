@@ -3,13 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
-// Remove StrictMode in production for better perf (dev double-renders)
-const root = import.meta.env.DEV ? (
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
-  </StrictMode>
-) : (
-  <App />
+  </StrictMode>,
 )
-
-createRoot(document.getElementById('root')!).render(root)
