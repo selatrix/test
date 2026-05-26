@@ -1,19 +1,31 @@
+import 'dotenv/config'; // 🔥 This automatically reads your .env file!
 import express  from 'express';
 import cors     from 'cors';
 import TelegramBot from 'node-telegram-bot-api';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname  = dirname(fileURLToPath(import.meta.url));
 const ROOT       = join(__dirname, '..');
-const DATA_FILE  = join(ROOT, 'data', 'content.json');
+const DATA_DIR   = join(ROOT, 'data');
+const DATA_FILE  = join(DATA_DIR, 'content.json');
+
 const BOT_TOKEN  = process.env.TELEGRAM_BOT_TOKEN;
-const OWNER_ID   = Number(process.env.TELEGRAM_OWNER_ID);
+const OWNER_ID   = process.env.TELEGRAM_OWNER_ID; // Kept as string for safe matching
 const API_PORT   = 3001;
 
-if (!BOT_TOKEN) { console.error('[bot] TELEGRAM_BOT_TOKEN not set'); process.exit(1); }
-if (!OWNER_ID)  { console.error('[bot] TELEGRAM_OWNER_ID not set');  process.exit(1); }
+if (!BOT_TOKEN) { console.error('[bot] ERROR: TELEGRAM_BOT_TOKEN is missing from .env'); process.exit(1); }
+if (!OWNER_ID)  { console.error('[bot] ERROR: TELEGRAM_OWNER_ID is missing from .env');  process.exit(1); }
+
+/* ─── Database directory check ──────────────────────────────── */
+if (!existsSync(DATA_DIR)) {
+  mkdirSync(DATA_DIR, { recursive: true });
+}
+if (!existsSync(DATA_FILE)) {
+  const defaultData = { about: { bio: "Hello!", stats: [], inventory: [] }, games: [], projects: [] };
+  writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2));
+}
 
 /* ─── Content helpers ──────────────────────────────────────── */
 const load = () => JSON.parse(readFileSync(DATA_FILE, 'utf-8'));
@@ -38,7 +50,9 @@ app.listen(API_PORT, () => console.log(`[api] http://localhost:${API_PORT}/api/c
 const bot      = new TelegramBot(BOT_TOKEN, { polling: true });
 const sessions = {}; // chatId → { step, data }
 
-const isOwner  = (msg) => msg.from?.id === OWNER_ID;
+// Safe owner check: forces both sides to strings to prevent Type Mismatches
+const isOwner  = (msg) => String(msg.from?.id) === String(OWNER_ID);
+
 const md       = (id, text, extra = {}) =>
   bot.sendMessage(id, text, { parse_mode: 'Markdown', disable_web_page_preview: true, ...extra });
 
@@ -59,7 +73,7 @@ bot.onText(/^\/(start|menu)$/, (msg) => {
 /* ─── /help ─────────────────────────────────────────────────── */
 bot.onText(/^\/help$/, (msg) => {
   if (!isOwner(msg)) return;
-  md(msg.chat.id, `*Commands*\n\n/menu — main menu\n/status — content summary\n\n*About*\n/about — view & edit about\n/setbio — update bio text\n\n*Games*\n/games — list games\n/addgame — add a game\n/removegame \\<num\\> — remove game\n\n*Projects*\n/projects — list sections\n/addproject \\<section\\> — add item\n/removeproject \\<section\\> \\<num\\> — remove item\n\nSections: apps github sites bots tools`);
+  md(msg.chat.id, `*Commands*\n\n/menu — main menu\n/status — content summary\n\n*About*\n/about — view & edit about\n/setbio — update bio text\n\n*Games*\n/games — list games\n/addgame — add a game\n/removegame <num> — remove game\n\n*Projects*\n/projects — list sections\n/addproject <section> — add item\n/removeproject <section> <num> — remove item\n\nSections: apps github sites bots tools`);
 });
 
 /* ─── /status ───────────────────────────────────────────────── */
@@ -80,7 +94,7 @@ const showAbout = (chatId) => {
       [{ text: '✏️ Edit Bio',       callback_data: 'about_bio'       }],
       [{ text: '📊 Edit Stats',     callback_data: 'about_stats'     }],
       [{ text: '🎒 Edit Inventory', callback_data: 'about_inventory' }],
-      [{ text: '⬅️ Menu',          callback_data: 'nav_menu'        }],
+      [{ text: '⬅️ Menu',           callback_data: 'nav_menu'        }],
     ]}},
   );
 };
@@ -107,7 +121,7 @@ const showGames = (chatId) => {
         { text: `🗑️ ${i+1}`, callback_data: `game_rm_${i}`   },
       ]),
       [{ text: '⬅️ Menu', callback_data: 'nav_menu' }],
-    ]},
+    ])},
   );
 };
 bot.onText(/^\/games$/, (msg) => { if (!isOwner(msg)) return; showGames(msg.chat.id); });
@@ -136,7 +150,7 @@ const showProjects = (chatId) => {
     reply_markup: { inline_keyboard: [
       ...d.projects.map(s => [{ text: `📂 ${s.label}`, callback_data: `sec_${s.key}` }]),
       [{ text: '⬅️ Menu', callback_data: 'nav_menu' }],
-    ]},
+    ])},
   );
 };
 bot.onText(/^\/projects$/, (msg) => { if (!isOwner(msg)) return; showProjects(msg.chat.id); });
@@ -164,13 +178,12 @@ bot.onText(/^\/removeproject (\w+) (\d+)$/, (msg, m) => {
 
 /* ─── Callback query handler ────────────────────────────────── */
 bot.on('callback_query', async (q) => {
-  if (q.from.id !== OWNER_ID) return;
+  if (q.from.id.toString() !== OWNER_ID.toString()) return;
   const id   = q.message.chat.id;
   const data = q.data;
   bot.answerCallbackQuery(q.id).catch(() => {});
 
   if (data === 'nav_menu'     || data === 'nav_start') { 
-    const d = load();
     md(id, `🎮 *ink's site manager*\n\nWhat do you want to manage?`, {
       reply_markup: { inline_keyboard: [
         [{ text: '📝 About',    callback_data: 'nav_about'    }],
@@ -185,7 +198,7 @@ bot.on('callback_query', async (q) => {
   if (data === 'nav_projects') { showProjects(id); return; }
   if (data === 'nav_about')    { showAbout(id); return; }
   if (data === 'nav_help')     { 
-    md(id, `*Commands*\n\n/menu — main menu\n/status — content summary\n\n*About*\n/about — view & edit about\n/setbio — update bio text\n\n*Games*\n/games — list games\n/addgame — add a game\n/removegame \\<num\\> — remove game\n\n*Projects*\n/projects — list sections\n/addproject \\<section\\> — add item\n/removeproject \\<section\\> \\<num\\> — remove item\n\nSections: apps github sites bots tools`, {
+    md(id, `*Commands*\n\n/menu — main menu\n/status — content summary\n\n*About*\n/about — view & edit about\n/setbio — update bio text\n\n*Games*\n/games — list games\n/addgame — add a game\n/removegame <num> — remove game\n\n*Projects*\n/projects — list sections\n/addproject <section> — add item\n/removeproject <section> <num> — remove item\n\nSections: apps github sites bots tools`, {
       reply_markup: { inline_keyboard: [
         [{ text: '⬅️ Menu', callback_data: 'nav_menu' }],
       ]},
@@ -230,7 +243,7 @@ bot.on('callback_query', async (q) => {
           { text: `🗑️ ${i+1}`, callback_data: `prm_${key}_${i}`   },
         ]),
         [{ text: '⬅️ Projects', callback_data: 'nav_projects' }],
-      ]},
+      ])},
     }); return;
   }
 
@@ -243,7 +256,7 @@ bot.on('callback_query', async (q) => {
   }
 
   if (data.startsWith('prm_')) {
-    const parts = data.slice(4).split('_'); // key_idx — but key has no underscore
+    const parts = data.slice(4).split('_'); 
     const idx = parseInt(parts[parts.length - 1]);
     const key = parts.slice(0, -1).join('_');
     const d = load(); const sec = d.projects.find(s => s.key === key);
@@ -283,7 +296,7 @@ bot.on('callback_query', async (q) => {
 
 /* ─── Message handler (session state machine) ───────────────── */
 bot.on('message', (msg) => {
-  if (msg.from?.id !== OWNER_ID) return;
+  if (!isOwner(msg)) return;
   if (!msg.text || msg.text.startsWith('/')) return;
   const id   = msg.chat.id;
   const text = msg.text.trim();
