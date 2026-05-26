@@ -108,7 +108,7 @@ const showGames = (chatId) => {
       ]),
       [{ text: '⬅️ Menu', callback_data: 'nav_menu' }],
     ]},
-  );
+  });
 };
 bot.onText(/^\/games$/, (msg) => { if (!isOwner(msg)) return; showGames(msg.chat.id); });
 
@@ -137,7 +137,7 @@ const showProjects = (chatId) => {
       ...d.projects.map(s => [{ text: `📂 ${s.label}`, callback_data: `sec_${s.key}` }]),
       [{ text: '⬅️ Menu', callback_data: 'nav_menu' }],
     ]},
-  );
+  });
 };
 bot.onText(/^\/projects$/, (msg) => { if (!isOwner(msg)) return; showProjects(msg.chat.id); });
 
