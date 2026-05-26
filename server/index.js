@@ -32,6 +32,9 @@ app.get('/api/content', (_req, res) => {
   catch { res.status(500).json({ error: 'Failed to load content' }); }
 });
 
+app.use(express.static(join(ROOT, 'dist')));
+app.get('*', (_req, res) => res.sendFile(join(ROOT, 'dist', 'index.html')));
+
 app.listen(API_PORT, () => console.log(`[api] http://localhost:${API_PORT}/api/content`));
 
 /* ─── Telegram bot ─────────────────────────────────────────── */
