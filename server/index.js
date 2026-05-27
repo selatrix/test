@@ -1,24 +1,49 @@
-import express  from 'express';
-import cors     from 'cors';
+import express  from 'express';
+import cors     from 'cors';
 import TelegramBot from 'node-telegram-bot-api';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-const __dirname  = dirname(fileURLToPath(import.meta.url));
-const ROOT       = join(__dirname, '..');
-const DATA_FILE  = join(ROOT, 'data', 'content.json');
-const BOT_TOKEN  = process.env.TELEGRAM_BOT_TOKEN;
-const OWNER_ID   = Number(process.env.TELEGRAM_OWNER_ID);
+const __dirname  = dirname(fileURLToPath(import.meta.url));
+const ROOT       = join(__dirname, '..');
+const BOT_TOKEN  = process.env.TELEGRAM_BOT_TOKEN;
+const OWNER_ID   = Number(process.env.TELEGRAM_OWNER_ID);
+const JSONBIN_KEY = process.env.JSONBIN_KEY;
+const JSONBIN_BIN = process.env.JSONBIN_BIN;
 const API_PORT   = process.env.PORT || 3001;
 
-if (!BOT_TOKEN) { console.error('[bot] TELEGRAM_BOT_TOKEN not set'); process.exit(1); }
-if (!OWNER_ID)  { console.error('[bot] TELEGRAM_OWNER_ID not set');  process.exit(1); }
+if (!BOT_TOKEN)   { console.error('[bot] TELEGRAM_BOT_TOKEN not set'); process.exit(1); }
+if (!OWNER_ID)    { console.error('[bot] TELEGRAM_OWNER_ID not set');  process.exit(1); }
+if (!JSONBIN_KEY) { console.error('[data] JSONBIN_KEY not set');        process.exit(1); }
+if (!JSONBIN_BIN) { console.error('[data] JSONBIN_BIN not set');        process.exit(1); }
 
 /* ─── Content helpers ──────────────────────────────────────── */
-const load = () => JSON.parse(readFileSync(DATA_FILE, 'utf-8'));
-const save = (d) => writeFileSync(DATA_FILE, JSON.stringify(d, null, 2));
+let _cache = null;
+
+const load = () => _cache;
+const save = (d) => {
+  _cache = d;
+  fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
+    method: 'PUT',
+    headers: { 'X-Master-Key': JSONBIN_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(d)
+  }).catch(e => console.error('[data] save error:', e));
+};
+
+const init = async () => {
+  const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}/latest`, {
+    headers: { 'X-Master-Key': JSONBIN_KEY }
+  });
+  const j = await r.json();
+  _cache = j.record;
+  console.log('[data] loaded from JSONBin');
+};
+
+init().catch(e => { console.error('[data] init failed:', e); process.exit(1); });
+
 const nextId = (arr) => Math.max(0, ...arr.map(g => g.id || 0)) + 1;
+
+const COLORS = ['#00ffff','#ff00ff','#aaff00','#ff6600','#7b68ee','#ff9944','#ff4444','#ffffff'];
 
 const COLORS = ['#00ffff','#ff00ff','#aaff00','#ff6600','#7b68ee','#ff9944','#ff4444','#ffffff'];
 
