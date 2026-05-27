@@ -40,7 +40,12 @@ const init = async () => {
 };
 
 init().catch(e => { console.error('[data] init failed:', e); process.exit(1); });
+init().catch(e => { console.error('[data] init failed:', e); process.exit(1); });
 
+const nextId = (arr) => Math.max(0, ...arr.map(g => g.id || 0)) + 1;
+const COLORS = ['#00ffff','#ff00ff','#aaff00','#ff6600','#7b68ee','#ff9944','#ff4444','#ffffff'];
+
+/* ─── Express API ──────────────────────────────────────────── */
 
 /* ─── Express API ──────────────────────────────────────────── */
 const app = express();
